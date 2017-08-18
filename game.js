@@ -11,6 +11,7 @@ pelota, y el tamaño del tablero (Board)*/
 		this.game_over = false;
 		this.bars = [];
 		this.ball = null;
+		this.playing = false;
 
 	}
 	/*Creamos un prototype para agregar los diferentes elementos del juego.*/
@@ -66,8 +67,20 @@ pelota, y el tamaño del tablero (Board)*/
 		this.kind = 'circle';
 
 		this.board.ball = this;
+		this.speed_x = 3;
+		this.speed_y = 0;
+
+		this.direction = 1;
 
 	}
+
+	self.Ball.prototype = {
+		move: function(){
+			this.x += (this.speed_x * this.direction);
+			this.y += (this.speed_y);
+		}
+	}
+
 })();
 
 	/*Creamos la VISTA del juego. Recibira por parametro el canvas y el board para mostrarlo*/
@@ -96,9 +109,12 @@ pelota, y el tamaño del tablero (Board)*/
 				draw(this.ctx, el);
 			}
 		},
-		play: function(){	
-			this.clean();
-			this.draw();
+		play: function(){
+			if (this.board.playing == true)	{
+				this.clean();
+				this.draw();
+				this.board.ball.move();
+			}
 		}
 	}
 
@@ -132,25 +148,32 @@ var board_view = new BoardView(canvas,board);
 
 document.addEventListener('keydown', function(e){
 
-	e.preventDefault();
-
 	if(e.keyCode == 40){
+		e.preventDefault();
 		bar1.up();
 	}
 	else if(e.keyCode == 38){
+		e.preventDefault();
 		bar1.down();
 	}
 	else if(e.keyCode == 87){
+		e.preventDefault();
 		bar2.down();
 	}
 	else if(e.keyCode == 83){
+		e.preventDefault();
 		bar2.up();
+	}
+	else if(e.keyCode == 32){
+		e.preventDefault();
+		board.playing =! board.playing;
 	}
 
 	console.log(""+bar1);
 	console.log(""+bar2);
 
 });
+
 
 window.requestAnimationFrame(controller);
 
