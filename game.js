@@ -16,7 +16,7 @@ pelota, y el tamaño del tablero (Board)*/
 	/*Creamos un prototype para agregar los diferentes elementos del juego.*/
 	self.Board.prototype = {
 		get elements(){
-			var elements = this.bars;
+			var elements = this.bars.map(function(bar){ return bar; });
 			elements.push(this.ball);
 			return elements;
 		}
@@ -35,6 +35,7 @@ pelota, y el tamaño del tablero (Board)*/
 		this.height = height;
 		this.board = board;
 		this.kind = 'rectangle';
+		this.speed = 10;
 
 		this.board.bars.push(this);
 
@@ -42,10 +43,13 @@ pelota, y el tamaño del tablero (Board)*/
 
 	self.Bar.prototype = {
 		 up: function(){
-
+		 	this.y += this.speed;
 		},
 		 down: function(){
-
+		 	this.y -= this.speed;
+		},
+		toString: function(){
+			return "x: " +this.x +" y: " +this.y;
 		}
 	}
 })();
@@ -62,7 +66,6 @@ pelota, y el tamaño del tablero (Board)*/
 		this.kind = 'circle';
 
 		this.board.ball = this;
-		console.log(this.board.elements);
 
 	}
 })();
@@ -82,43 +85,77 @@ pelota, y el tamaño del tablero (Board)*/
 
 	self.BoardView.prototype = {
 
+		clean: function(){
+			this.ctx.clearRect(0,0, this.board.width, this.board.height);
+		},
+
 		draw: function(){
 			for(var i = this.board.elements.length - 1; i >= 0; i--) {
 				var el = this.board.elements[i];
+				console.log(el);
 				draw(this.ctx, el);
 			}
+		},
+		play: function(){	
+			this.clean();
+			this.draw();
 		}
 	}
 
 	function draw(ctx, element){
-		if(element !== null || element.hasOwnProperty(kind)) {
-			switch(element.kind){
+		console.log(element);
+		switch(element.kind){
 			case "rectangle":
 				ctx.fillRect(element.x, element.y, element.width, element.height);
 				break;
 			case "circle":
-				    ctx.arc(element.x, element.y, 10, 0, 7, true);
-    				ctx.fill();
+					ctx.beginPath();
+					ctx.arc(element.x, element.y, 10, 0, 7, true);
+					ctx.fill();
+					ctx.closePath();
 				break;
 			}
-		}	
-	}
-		
-})();
+		}
+
+
+
+	})();
 
 /*MAIN QUE EJECUTARA EL JUEGO*/
+//Declaracion de variables
+var board = new Board(800,400);
+var bar1 = new Bar(20,100,40,100,board);
+var bar2 = new Bar(740,100,40,100,board);
+var ball = new Ball(300,100,board);
+var canvas = document.getElementById('myCanvas');
+var board_view = new BoardView(canvas,board);
 
-window.addEventListener('load', main);
+document.addEventListener('keydown', function(e){
 
-function main(){
+	e.preventDefault();
 
-	var board = new Board(800,400);
-	var bar = new Bar(20,100,40,100,board);
-	var bar = new Bar(740,100,40,100,board);
-	var ball = new Ball(300,100,board);
-	var canvas = document.getElementById('myCanvas');
-	var board_view = new BoardView(canvas,board);
+	if(e.keyCode == 40){
+		bar1.up();
+	}
+	else if(e.keyCode == 38){
+		bar1.down();
+	}
+	else if(e.keyCode == 87){
+		bar2.down();
+	}
+	else if(e.keyCode == 83){
+		bar2.up();
+	}
 
-	board_view.draw();
+	console.log(""+bar1);
+	console.log(""+bar2);
+
+});
+
+window.requestAnimationFrame(controller);
+
+function controller(){
+	board_view.play();
+	window.requestAnimationFrame(controller);
 }
 
